@@ -1,7 +1,7 @@
 ## Model:
 
 - Swiss Table Style with SIMD probing and Robin Hood insert algorithm
-### Swiss Table
+## Swiss Table
 
 #### Complexity:
 	- O(|key|) → key ⇐ 30 chars: O(1)
@@ -14,7 +14,10 @@
 - advantage:
 	- performance gain by comparing fingerprints first and only comparing keys ( CPU heavier ) once fp match has been found.
 
-## Robin Hood
+## Robin Hood:
+
+#### Concept:
+  
 
 #### Complexity:
 	O(1)
@@ -66,7 +69,7 @@ uint64_t HashTable::hashString ( const std::string &key ) noexcept {
  - produces a well-distributed integer hash
 - 
 
-### SIMD:
+## SIMD:
 
 "Single Instruction Multiple Data"
 
