@@ -37,7 +37,8 @@ void run_menu ( HashTable &ht, owner_t &owner ) {
 
         //  BATCH IMPORT
         if ( cmd == "B" || cmd == "BATCH" ) {
-            auto dir = input_screen ( output, status, "Directory of CSV files:" );
+            auto dir = input_screen ( output, status, "Directory of CSV files [../stock_prices/]:" );
+            if ( dir.empty() ) dir = "../stock_prices/";
             status = "Scanning " + dir + " …";
 
             BatchResult res = batch_import ( dir, ht, owner );

@@ -4,7 +4,10 @@
 #include <chrono>
 #include <cstddef>
 #include <fstream>
+#include <iomanip>
 #include <iostream>
+#include <set>
+#include <sstream>
 
 #ifdef __AVX2__
 #include <immintrin.h>
@@ -173,21 +176,106 @@ void HashTable::rehash ( std::size_t newCapacity ) {
 
 // === List all entries ===
 std::vector<std::string> HashTable::listAll () const {
-    std::vector<std::string> lines;
+    // ── collect unique Stock pointers ────────────────────────────────────────
+    std::set<const Stock *> seen;
+    std::vector<const Stock *> stocks;
     for ( std::size_t i = 0; i < ctrl_.size(); ++i ) {
         if ( ctrl_[ i ] != EMPTY && ctrl_[ i ] != DELETED ) {
-            const Stock *stock = entries_[ i ].stock;
-            std::string line = "  " + stock->getName() +
-                               "  (" + stock->getSymbol() + ", " + stock->getWKN() + ")";
-            if ( stock->hasHistory() ) {
-                line += "  close: " + std::to_string ( stock->latest().close ) +
-                        "  on " + stock->latest().date;
-            }
-            lines.push_back ( line );
+            const Stock *s = entries_[ i ].stock;
+            if ( seen.insert ( s ).second )
+                stocks.push_back ( s );
         }
     }
-    if ( lines.empty() )
-        lines.push_back ( "  (no stocks)" );
+
+    if ( stocks.empty() ) {
+        return { "  (no stocks)" };
+    }
+
+    // ── sort alphabetically by name ──────────────────────────────────────────
+    std::sort ( stocks.begin(), stocks.end(),
+                [] ( const Stock *a, const Stock *b ) {
+                    return a->getName() < b->getName();
+                } );
+
+    // ── measure column widths ────────────────────────────────────────────────
+    // Fixed widths that fit comfortably inside the 62-col TUI panel:
+    //   #    : 3   (right-aligned index)
+    //   name : up to 24 (left-aligned, truncated)
+    //   sym  : 6   (left-aligned)
+    //   wkn  : 8   (left-aligned)
+    //   close: 9   (right-aligned "XXXXXX.XX")
+    //   date : 10  (YYYY-MM-DD)
+    // Total with separators:  3 + 1 + 24 + 1 + 6 + 1 + 8 + 1 + 9 + 2 + 10 = 66
+    // We keep name to 22 to land at 62.
+
+    static constexpr int W_NAME  = 22;
+    static constexpr int W_SYM   =  6;
+    static constexpr int W_WKN   =  8;
+    static constexpr int W_CLOSE =  9;
+    static constexpr int W_DATE  = 10;
+
+    auto clip = [] ( const std::string &s, int w ) -> std::string {
+        if ( static_cast<int> ( s.size() ) <= w ) return s;
+        return s.substr ( 0, static_cast<std::size_t> ( w - 1 ) ) + "\xe2\x80\xa6"; // …
+    };
+
+    std::vector<std::string> lines;
+
+    // ── header ───────────────────────────────────────────────────────────────
+    {
+        std::ostringstream h;
+        h << "  "
+          << std::left  << std::setw ( W_NAME  ) << "Name"
+          << "  "
+          << std::left  << std::setw ( W_SYM   ) << "Sym"
+          << " "
+          << std::left  << std::setw ( W_WKN   ) << "WKN"
+          << " "
+          << std::right << std::setw ( W_CLOSE ) << "Close"
+          << "  "
+          << std::left  << "Date";
+        lines.push_back ( h.str() );
+        // divider
+        lines.push_back ( "  " + std::string ( W_NAME, '-' )
+                          + "  " + std::string ( W_SYM,   '-' )
+                          + " "  + std::string ( W_WKN,   '-' )
+                          + " "  + std::string ( W_CLOSE, '-' )
+                          + "  " + std::string ( W_DATE,  '-' ) );
+    }
+
+    // ── rows ─────────────────────────────────────────────────────────────────
+    int idx = 1;
+    for ( const Stock *s : stocks ) {
+        std::ostringstream row;
+
+        // name
+        row << "  " << std::left << std::setw ( W_NAME ) << clip ( s->getName(), W_NAME );
+
+        // symbol
+        row << "  " << std::left << std::setw ( W_SYM ) << clip ( s->getSymbol(), W_SYM );
+
+        // WKN
+        row << " " << std::left << std::setw ( W_WKN ) << clip ( s->getWKN(), W_WKN );
+
+        // close + date
+        if ( s->hasHistory() ) {
+            const PriceEntry &e = s->latest();
+            row << " " << std::right << std::fixed << std::setprecision ( 2 )
+                << std::setw ( W_CLOSE ) << e.close;
+            row << "  " << std::left << e.date;
+        } else {
+            row << " " << std::right << std::setw ( W_CLOSE ) << "—"
+                << "  " << std::left << "no data";
+        }
+
+        lines.push_back ( row.str() );
+        ++idx;
+    }
+
+    // ── footer ───────────────────────────────────────────────────────────────
+    lines.push_back ( "" );
+    lines.push_back ( "  " + std::to_string ( stocks.size() ) + " stock(s)" );
+
     return lines;
 }  // listAll
 
