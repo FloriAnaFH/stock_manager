@@ -64,10 +64,6 @@ void Stock::importCSV ( const std::string &filename ) {
     std::string line;
     std::getline ( file, line );  // Skip header
                                   //
-    auto stripDollar = [] ( std::string &s ) {
-        if ( !s.empty() && s.front() == '$' )
-            s.erase ( 0, 1 );
-    };
 
     while (std::getline(file, line) && history_.size() < 30){
         history_.push_back(parseCSVLine(line));
