@@ -9,28 +9,30 @@ a simple cli stock manager written in c++ that uses a high-performance Swiss-Tab
 - (optional) AVX2 vector search ( compare 32 bytes simultaniously )
 - plot historical price data ( ASCI Plot )
 
-## build with make:
+## Build with make:
 
 ```bash
 # build
-make
-
-# run with:
-./stock_manager
-
-# get help:
-make help
+make                # build with default options
 
 # make options:
 make clean          # remove build files
 make release        # build with optimizations and no debug info
 make test           # run tests
-make avx2           # build with avx2 optimizations
+make avx2           # build with avx2 optimizations*
 make avx2-release   # build with avx2 optimizations and no debug info
 
+# get help:
+make help
+
+# run:
+cd build
+./stock_manager
 ```
 
-avx2 requires a cpu and compiler support. If you get an error about avx2 not being supported, try building without it.
+    *avx2 requires a cpu and compiler support. If you get an error about avx2 not being supported, try building without it.
+
+binaries are saved to build folder.
 
 ## Menu options:
 
