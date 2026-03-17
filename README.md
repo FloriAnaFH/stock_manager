@@ -60,3 +60,11 @@ B    BATCH      batch import stock prices from a folder
 ```
 
 Enter number or string ( 0-9 or command name ):
+
+## Screenshots
+
+<img width="712" height="864" alt="image" src="https://github.com/user-attachments/assets/5c05dabc-07b1-4191-95a4-190423d3795c" />
+
+<img width="711" height="781" alt="image" src="https://github.com/user-attachments/assets/0da2ab66-d55f-45e6-ac9a-af87c6b77fc8" />
+
+
