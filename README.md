@@ -34,16 +34,16 @@ avx2 requires a cpu and compiler support. If you get an error about avx2 not bei
 
 ## Menu options:
 
-0 STATS - show hash table stats and 'mini' benchmarks ( 200 runs )
-1 ADD - add a new stock ( name, symbol, wkn )
-2 DELETE - delete a stock by name or symbol
-3 IMPORT - import historical prices for a given stock
-4 SEARCH - search for a stock by name or symbol
-5 PLOT - plot the last 30 days of historical prices for a given stock
-6 LIST - list all stocks in the database
-7 SAVE - save the database to a file
-8 LOAD - load the database from a file
-9 QUIT
-B BATCH - batch import stock prices from a folder
+0 STATS - show hash table stats and 'mini' benchmarks ( 200 runs ) <br/>
+1 ADD - add a new stock ( name, symbol, wkn ) <br/>
+2 DELETE - delete a stock by name or symbol<br/>
+3 IMPORT - import historical prices for a given stock<br/>
+4 SEARCH - search for a stock by name or symbol<br/>
+5 PLOT - plot the last 30 days of historical prices for a given stock<br/>
+6 LIST - list all stocks in the database<br/>
+7 SAVE - save the database to a file<br/>
+8 LOAD - load the database from a file<br/>
+9 QUIT<br/>
+B BATCH - batch import stock prices from a folder<br/>
 
 Enter number or string ( 0-9 or command name ):
