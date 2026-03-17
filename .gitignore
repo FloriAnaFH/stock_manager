@@ -2,3 +2,9 @@ build/
 tui/
 stock_prices/
 saved_files/
+obj/
+.idea/
+stock_manager
+run_tests
+.o*
+.d*

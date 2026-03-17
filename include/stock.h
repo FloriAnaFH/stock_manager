@@ -23,6 +23,7 @@ class Stock {
     static Stock loadFromFile ( std::istream &inputStram );
 
   private:
+    static PriceEntry parseCSVLine(const std::string &line);
     std::string name_, wkn_, symbol_;
     std::vector<PriceEntry> history_;
 

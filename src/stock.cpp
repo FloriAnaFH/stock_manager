@@ -18,6 +18,42 @@ const PriceEntry &Stock::latest () const {
     return history_.back();
 }  // latest
 
+PriceEntry Stock::parseCSVLine( const std::string &line) {
+
+    auto stripDollar = [](std::string &s) {
+        if (!s.empty() && s.front() == '$')
+            s.erase(0, 1);
+    };
+
+    std::istringstream ss(line);
+    PriceEntry entry;
+    std::string tok;
+
+    std::getline(ss, entry.date, ',');
+
+    std::getline(ss, tok, ',');
+    stripDollar(tok);
+    entry.close  = std::stod(tok);
+
+    std::getline(ss, tok, ',');
+    entry.volume = std::stol(tok);
+
+    std::getline(ss, tok, ',');
+    stripDollar(tok);
+    entry.open   = std::stod(tok);
+
+    std::getline(ss, tok, ',');
+    stripDollar(tok);
+    entry.high   = std::stod(tok);
+
+    std::getline(ss, tok, ',');
+    stripDollar(tok);
+    entry.low    = std::stod(tok);
+
+    return entry;
+}
+
+
 void Stock::importCSV ( const std::string &filename ) {
     std::ifstream file ( filename );
     if ( !file ) {
@@ -28,37 +64,9 @@ void Stock::importCSV ( const std::string &filename ) {
     std::string line;
     std::getline ( file, line );  // Skip header
                                   //
-    auto stripDollar = [] ( std::string &s ) {
-        if ( !s.empty() && s.front() == '$' )
-            s.erase ( 0, 1 );
-    };
 
-    while ( std::getline ( file, line ) && history_.size() < 30 ) {
-        std::istringstream ss ( line );
-        PriceEntry entry;
-        std::string tok;
-        std::getline ( ss, entry.date, ',' );
-
-        std::getline ( ss, tok, ',' );
-        stripDollar ( tok );
-        entry.close = std::stod ( tok );
-
-        std::getline ( ss, tok, ',' );
-        entry.volume = std::stol ( tok );
-
-        std::getline ( ss, tok, ',' );
-        stripDollar ( tok );
-        entry.open = std::stod ( tok );
-
-        std::getline ( ss, tok, ',' );
-        stripDollar ( tok );
-        entry.high = std::stod ( tok );
-
-        std::getline ( ss, tok, ',' );
-        stripDollar ( tok );
-        entry.low = std::stod ( tok );
-
-        history_.push_back ( entry );
+    while (std::getline(file, line) && history_.size() < 30){
+        history_.push_back(parseCSVLine(line));
     }
 }  // importCSV
 
@@ -87,31 +95,10 @@ Stock Stock::loadFromFile ( std::istream &in ) {
     in.ignore();  // Ignore newline after size
     stock.history_.reserve ( n );
 
-    for ( size_t i = 0; i < n; ++i ) {
-        PriceEntry entry;
+    for (size_t i = 0; i < n; ++i) {
         std::string line;
-        std::getline ( in, line );
-        std::istringstream ss ( line );
-        std::string tok;
-
-        std::getline ( ss, entry.date, ',' );
-
-        std::getline ( ss, tok, ',' );
-        entry.close = std::stod ( tok );
-
-        std::getline ( ss, tok, ',' );
-        entry.volume = std::stol ( tok );
-
-        std::getline ( ss, tok, ',' );
-        entry.open = std::stod ( tok );
-
-        std::getline ( ss, tok, ',' );
-        entry.high = std::stod ( tok );
-
-        std::getline ( ss, tok, ',' );
-        entry.low = std::stod ( tok );
-
-        stock.history_.push_back ( std::move ( entry ) );
+        std::getline(in, line);
+        stock.history_.push_back(parseCSVLine(line));
     }
 
     return stock;
