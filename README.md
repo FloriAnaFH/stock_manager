@@ -1,4 +1,4 @@
-# Stock Manager
+#  Stock Manager
 
 a simple cli stock manager written in c++ that uses a high-performance Swiss-Table-style hash table that uses AVX2 to manage stock data.
 
