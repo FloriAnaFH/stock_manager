@@ -15,7 +15,8 @@
 /* performance enhancements:
  *  - replace '%capacity' with '& mask_' 20-80 CPU cycles vs. 1 cycle
  */
-HashTable::HashTable ( std::size_t capacity ) : ctrl_ ( pow2 ( capacity ), EMPTY ), entries_ ( pow2 ( capacity ) ), size_ ( 0 ), mask_ ( pow2 ( capacity ) - 1 ) {
+HashTable::HashTable ( std::size_t capacity )
+    : ctrl_ ( pow2 ( capacity ), EMPTY ), entries_ ( pow2 ( capacity ) ), size_ ( 0 ), mask_ ( pow2 ( capacity ) - 1 ) {
     if ( capacity == 0 ) {
         throw std::invalid_argument ( "Capacity must be > 0" );
     }
@@ -110,7 +111,7 @@ std::ptrdiff_t HashTable::probe ( const std::string &key, uint64_t hash, bool in
 
         if ( foundEmpty ) {
             if ( !insert )
-                return -1;  // Not found
+                return -1;                                                                            // Not found
             return firstTombstone != -1 ? firstTombstone : static_cast<std::ptrdiff_t> ( emptyIdx );  // Insert here
         }
         group = ( group + GROUP_SIZE ) & mask_;  // Move to next group
@@ -164,11 +165,11 @@ bool HashTable::ht_delete ( const std::string &key ) {
     ctrl_[ idx ] = DELETED;
     entries_[ idx ] = Entry();  // Clear entry
     --size_;
-    ++ deleted_; // track tombstones for rehash
+    ++deleted_;  // track tombstones for rehash
 
     // rehash when ratio tombstone/capacity > 20%
-    if ( static_cast <double> ( deleted_ ) / static_cast <double> (ctrl_.size() ) > MAX_TOMB ) {
-        rehash ( ctrl_.size());
+    if ( static_cast<double> ( deleted_ ) / static_cast<double> ( ctrl_.size() ) > MAX_TOMB ) {
+        rehash ( ctrl_.size() );
     }
 
     return true;
@@ -184,11 +185,11 @@ void HashTable::rehash ( std::size_t newCapacity ) {
             newTable.ht_insert ( entry.key, entry.stock );
         }
     }
-    ctrl_     = std::move ( newTable.ctrl_ );
-    entries_  = std::move ( newTable.entries_ );
-    size_     = newTable.size_;
-    mask_     = ctrl_.size() - 1;  // Update mask for new capacity
-    deleted_  = 0; // reset tombstone counter
+    ctrl_ = std::move ( newTable.ctrl_ );
+    entries_ = std::move ( newTable.entries_ );
+    size_ = newTable.size_;
+    mask_ = ctrl_.size() - 1;  // Update mask for new capacity
+    deleted_ = 0;              // reset tombstone counter
 }  // rehash
 
 // === List all entries ===
@@ -208,49 +209,40 @@ std::vector<std::string> HashTable::listAll () const {
         return { "  (no stocks)" };
     }
 
-    // ── sort alphabetically by name ──────────────────────────────────────────
+    //  sort alphabetically by name
     std::sort ( stocks.begin(), stocks.end(),
-                [] ( const Stock *a, const Stock *b ) {
-                    return a->getName() < b->getName();
-                } );
+                [] ( const Stock *a, const Stock *b ) { return a->getName() < b->getName(); } );
 
-
-    static constexpr int W_NAME  = 22;
-    static constexpr int W_SYM   =  6;
-    static constexpr int W_WKN   =  8;
-    static constexpr int W_CLOSE =  9;
-    static constexpr int W_DATE  = 10;
+    static constexpr int W_NAME = 22;
+    static constexpr int W_SYM = 6;
+    static constexpr int W_WKN = 8;
+    static constexpr int W_CLOSE = 9;
+    static constexpr int W_DATE = 10;
 
     auto clip = [] ( const std::string &s, int w ) -> std::string {
-        if ( static_cast<int> ( s.size() ) <= w ) return s;
-        return s.substr ( 0, static_cast<std::size_t> ( w - 1 ) ) + "\xe2\x80\xa6"; // …
+        if ( static_cast<int> ( s.size() ) <= w )
+            return s;
+        return s.substr ( 0, static_cast<std::size_t> ( w - 1 ) ) + "\xe2\x80\xa6";  // …
     };
 
     std::vector<std::string> lines;
 
-    // ── header ───────────────────────────────────────────────────────────────
+    //  header
     {
         std::ostringstream h;
-        h << "  "
-          << std::left  << std::setw ( W_NAME  ) << "Name"
-          << "  "
-          << std::left  << std::setw ( W_SYM   ) << "Sym"
-          << " "
-          << std::left  << std::setw ( W_WKN   ) << "WKN"
-          << " "
-          << std::right << std::setw ( W_CLOSE ) << "Close"
-          << "  "
-          << std::left  << "Date";
+        h << "  " << std::left << std::setw ( W_NAME ) << "Name"
+          << "  " << std::left << std::setw ( W_SYM ) << "Sym"
+          << " " << std::left << std::setw ( W_WKN ) << "WKN"
+          << " " << std::right << std::setw ( W_CLOSE ) << "Close"
+          << "  " << std::left << "Date";
         lines.push_back ( h.str() );
         // divider
-        lines.push_back ( "  " + std::string ( W_NAME, '-' )
-                          + "  " + std::string ( W_SYM,   '-' )
-                          + " "  + std::string ( W_WKN,   '-' )
-                          + " "  + std::string ( W_CLOSE, '-' )
-                          + "  " + std::string ( W_DATE,  '-' ) );
+        lines.push_back ( "  " + std::string ( W_NAME, '-' ) + "  " + std::string ( W_SYM, '-' ) + " " +
+                          std::string ( W_WKN, '-' ) + " " + std::string ( W_CLOSE, '-' ) + "  " +
+                          std::string ( W_DATE, '-' ) );
     }
 
-    // ── rows ─────────────────────────────────────────────────────────────────
+    //  rows
     for ( const Stock *s : stocks ) {
         std::ostringstream row;
 
@@ -266,8 +258,7 @@ std::vector<std::string> HashTable::listAll () const {
         // close + date
         if ( s->hasHistory() ) {
             const PriceEntry &e = s->latest();
-            row << " " << std::right << std::fixed << std::setprecision ( 2 )
-                << std::setw ( W_CLOSE ) << e.close;
+            row << " " << std::right << std::fixed << std::setprecision ( 2 ) << std::setw ( W_CLOSE ) << e.close;
             row << "  " << std::left << e.date;
         } else {
             row << " " << std::right << std::setw ( W_CLOSE ) << "—"
@@ -277,7 +268,7 @@ std::vector<std::string> HashTable::listAll () const {
         lines.push_back ( row.str() );
     }
 
-    // ── footer ───────────────────────────────────────────────────────────────
+    //  footer
     lines.push_back ( "" );
     lines.push_back ( "  " + std::to_string ( stocks.size() ) + " stock(s)" );
 
@@ -300,8 +291,6 @@ void HashTable::save ( const std::string &filename ) const {
     }
 
 }  // save
-
-
 
 std::vector<std::unique_ptr<Stock>> HashTable::load ( const std::string &filename ) {
     std::ifstream file ( filename );
@@ -326,7 +315,8 @@ std::vector<std::unique_ptr<Stock>> HashTable::load ( const std::string &filenam
 }
 
 std::size_t HashTable::pow2 ( std::size_t n ) {
-    if ( n == 0 ) return 1;
+    if ( n == 0 )
+        return 1;
     --n;
     n |= n >> 1;
     n |= n >> 2;

@@ -62,9 +62,7 @@ void run_menu ( HashTable &ht, owner_t &owner ) {
             output.push_back ( "" );
 
             // ── per-file detail ───────────────────────────────────────────
-            // Failures and skips always shown; successes capped so the panel
-            // doesn't overflow on large imports.
-            static constexpr int MAX_OK_LINES = 8;
+            static constexpr int MAX_OK_LINES = 8; // only display 8 lines of data that imported OK to fit window
             int okShown = 0;
 
             for ( const auto &e : res.entries ) {
@@ -113,6 +111,7 @@ void run_menu ( HashTable &ht, owner_t &owner ) {
             };
 
             // ── header ────────────────────────────────────────────────────
+            // draw frame for heeader and print header
             output.push_back ( "  "
                                "\u2554\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550"
                                "\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550"
@@ -170,6 +169,7 @@ void run_menu ( HashTable &ht, owner_t &owner ) {
             auto wkn = input_screen ( output, "ADD \u2013 " + name, "WKN:" );
             auto symbol = input_screen ( output, "ADD \u2013 " + name, "Symbol:" );
             try {
+                // create unique prt to Stock
                 auto s = std::make_unique<Stock> ( name, wkn, symbol );
                 ht.ht_insert ( name, s.get() );
                 ht.ht_insert ( symbol, s.get() );

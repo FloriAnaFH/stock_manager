@@ -51,13 +51,11 @@ std::vector<std::string> plotStock ( const Stock &stock ) {
         sampled[ static_cast<std::size_t> ( c ) ] = history[ static_cast<std::size_t> ( idx ) ].close;
     }
 
-    // ── 2. price range ───────────────────────────────────────────────────────
     double lo = *std::min_element ( sampled.begin(), sampled.end() );
     double hi = *std::max_element ( sampled.begin(), sampled.end() );
     if ( hi <= lo )
         hi = lo + 1.0;
 
-    // ── 3. title ─────────────────────────────────────────────────────────────
     {
         std::string title = "  " + stock.getName() + " (" + stock.getSymbol() + ")" + "  –  close price,  " +
                             std::to_string ( N ) + " sessions";
@@ -67,13 +65,9 @@ std::vector<std::string> plotStock ( const Stock &stock ) {
         lines.push_back ( "" );
     }
 
-    // ── 4. build the 2-D grid (PLOT_H rows × columns columns) ───────────────────
-    //   grid[row][col] is true when that cell should be filled.
-    //   row 0 = top (highest price), row PLOT_H-1 = bottom (lowest price).
     std::vector<std::vector<char>> grid ( static_cast<std::size_t> ( PLOT_ROWS ),
                                           std::vector<char> ( static_cast<std::size_t> ( columns ), ' ' ) );
 
-    // For each column, compute the row that the price falls on.
     std::vector<int> priceRow ( static_cast<std::size_t> ( columns ) );
     for ( int c = 0; c < columns; ++c ) {
         double norm = ( sampled[ static_cast<std::size_t> ( c ) ] - lo ) / ( hi - lo );  // 0..1
@@ -82,8 +76,6 @@ std::vector<std::string> plotStock ( const Stock &stock ) {
         priceRow[ static_cast<std::size_t> ( c ) ] = row;
     }
 
-    // Place the dot for each column, and draw a vertical bar connecting
-    // adjacent points so there are no gaps.
     for ( int c = 0; c < columns; ++c ) {
         int r = priceRow[ static_cast<std::size_t> ( c ) ];
         grid[ static_cast<std::size_t> ( r ) ][ static_cast<std::size_t> ( c ) ] = '*';
@@ -98,7 +90,7 @@ std::vector<std::string> plotStock ( const Stock &stock ) {
         }
     }
 
-    // ── 5. render price rows ─────────────────────────────────────────────────
+    //  render price rows
     for ( int r = 0; r < PLOT_ROWS; ++r ) {
         // Y-axis label only on rows that are multiples of (PLOT_ROWS-1)/3
         // so we get ~4 evenly spaced tick marks (top, 2/3, 1/3, bottom).
@@ -119,7 +111,7 @@ std::vector<std::string> plotStock ( const Stock &stock ) {
         lines.push_back ( line );
     }
 
-    // ── 6. x-axis rule ───────────────────────────────────────────────────────
+    //  x-axis rule
     {
         std::string rule ( static_cast<std::size_t> ( YLABEL_W - 1 ), ' ' );
         rule += '+';
